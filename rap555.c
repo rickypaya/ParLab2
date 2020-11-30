@@ -36,7 +36,6 @@ void init_grid(life_t *life){
 			life->next_grid[i][j]=0;
 		}
 	}
-	//printf("Init grids, reading file\n");
 	fp = fopen(life->infile,"r");
 	if(fp==NULL){
 		printf("%s",life->infile);
@@ -50,7 +49,6 @@ void init_grid(life_t *life){
 			}
 		}
 	fclose(fp);
-	//printf("file read\n");
 }
 
 void init_life(life_t *life, int*c, char ***v){
@@ -60,18 +58,11 @@ void init_life(life_t *life, int*c, char ***v){
 	life->ncols = atoi(argv[2]);
 	life->nrows = atoi(argv[2]);
 	life->generations = atoi(argv[1]);
-
 	omp_set_num_threads(atoi(argv[3]));
 	life->size = atoi(argv[3]);
-
-
 	life->infile = argv[4];
 	strcpy(life->outfile,argv[4]);
 	strcat(life->outfile,".out");
-	
-	//printf("life init, init grid \n");
-	//printf("%s\n",output);
-
 	init_grid(life);
 }
 
@@ -79,15 +70,12 @@ void check_cells(life_t *life){
 	int i,j,k,l,neighbors;
 	int ncols = life->ncols;
 	int nrows = life->nrows;
-
 	int **grid =life->grid;
 	int **next_grid = life->next_grid;
-
 	#pragma omp parallel for private(neighbors,j,k,l)
 	for(i = 1; i<=ncols; i++){
 		for(j=1;j<=nrows;j++){
 			neighbors = 0;
-
 			for(k=i-1;k<=i+1;k++){
 				for(l=j-1;l<=j+1;l++){
 					if(!(k==i && l==j) && grid[k][l] == 1){
@@ -95,13 +83,11 @@ void check_cells(life_t *life){
 					}
 				}
 			}
-
 			if(neighbors<2 || neighbors >3){
 				next_grid[i][j] = 0;
 			}else if(grid[i][j] == 1 || neighbors == 3){
 				next_grid[i][j] = 1;
 			}
-
 		}
 	}
 }
@@ -112,7 +98,6 @@ void update(life_t *life){
 	int nrows = life->nrows;
 	int **grid = life->grid;
 	int **next_grid = life->next_grid;
-
 	#pragma omp parallel for private(j)
 	for(i = 0; i<ncols+2;i++){
 		for(j=0;j<nrows+2;j++){
@@ -129,32 +114,25 @@ void finish(life_t *life){
 	int ncols = life->ncols;
 	int nrows = life->nrows;
 	char *output = life->outfile;
-
 	fp = fopen(life->outfile,"w");
 	if(fp == NULL){printf("error:%d\n",errno);}
 	int **grid = life->grid;
 
-	//fwrite(grid,sizeof(int),sizeof(grid),fp);
-
 	 for(j=1; j<=nrows; j++){
 	 	for(i = 1; i<=ncols; i++){
-			//fputc(grid[i][j],fp);
 	 		fprintf(fp,"%d",grid[i][j]);
 			
 	 	}
 	 	fprintf(fp,"\n");
 	 }
-
 	fclose(fp);
-
+	
 	for (i = 0; i < ncols+2; i++) {
 		free(life->grid[i]);
 		free(life->next_grid[i]);
 	}
-
 	free(life->grid);
 	free(life->next_grid);
-
 }
 
 void displayGrid(life_t *life){
@@ -176,27 +154,16 @@ void displayGrid(life_t *life){
 int main(int argc,char ** argv){
 	int count;
 	life_t life;
-	//printf("life started\n");
-
 	init_life(&life, &argc, &argv);
-	//printf("life initialized\n");
-
-	//displayGrid(&life);
-
+	
 	for(count = 0; count<life.generations;count++){
-
 		check_cells(&life);
-
-		//printf("cells checked %d\n",count);
 
 		update(&life);
 
-		displayGrid(&life);
+		//displayGrid(&life);
 	}
 	
 	finish(&life);
-
-	//printf("life finished\n");
-
 	return 0;
 }
