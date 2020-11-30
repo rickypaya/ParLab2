@@ -66,8 +66,8 @@ void init_life(life_t *life, int*c, char ***v){
 
 
 	life->infile = argv[4];
-	life->outfile = argv[4];
-	strncat(life->outfile,".out");
+	strcpy(life->outfile,argv[4]);
+	strcat(life->outfile,".out");
 	
 	//printf("life init, init grid \n");
 	//printf("%s\n",output);
@@ -134,15 +134,16 @@ void finish(life_t *life){
 	if(fp == NULL){printf("error:%d\n",errno);}
 	int **grid = life->grid;
 
-	fwrite(grid,sizeof(int),sizeof(grid),fp);
+	//fwrite(grid,sizeof(int),sizeof(grid),fp);
 
-	// for(j=1; j<=nrows; j++){
-	// 	for(i = 1; i<=ncols; i++){
-	// 		fprintf(fp,"%d",life->grid[i][j]);
+	 for(j=1; j<=nrows; j++){
+	 	for(i = 1; i<=ncols; i++){
+			//fputc(grid[i][j],fp);
+	 		fprintf(fp,"%d",grid[i][j]);
 			
-	// 	}
-	// 	fprintf(fp,"\n");
-	// }
+	 	}
+	 	fprintf(fp,"\n");
+	 }
 
 	fclose(fp);
 
